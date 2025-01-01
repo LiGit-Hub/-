@@ -2,12 +2,12 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime, timedelta
 import asyncio
-import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # 추가된 부분
+import os  # 추가된 부분
 
-# .env 파일 로드
-load_dotenv()
-BOT_TOKEN = os.getenv("DISCORD_TOKEN")
+# .env 파일에서 환경변수 불러오기
+load_dotenv()  # 추가된 부분
+BOT_TOKEN = os.getenv("BOT_TOKEN")  # .env에서 BOT_TOKEN 불러오기
 
 # 모든 Intent 활성화
 intents = discord.Intents.all()
@@ -17,7 +17,7 @@ user_times = {}  # 유저 입장 시간 저장
 daily_usage = {}  # 유저별 총 이용 시간 저장
 
 # 텍스트 채널 ID 설정
-TEXT_CHANNEL_ID = 1323488987058540584  # 여기에 '111time' 채널 ID를 입력하세요
+TEXT_CHANNEL_ID = 1323488987058540584  # '111time' 채널 ID를 입력하세요
 
 # 이미지 URL 설정
 ENTER_IMAGE_URL = "https://i.pinimg.com/736x/e7/34/75/e73475fc7610c1ea695efe417cef78d4.jpg"  # 입장용 이미지
@@ -26,8 +26,7 @@ EXIT_IMAGE_URL = "https://i.pinimg.com/736x/3b/ce/e3/3bcee3ef83f32a13552fb20f347
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
-    if not send_daily_summary.is_running():
-        send_daily_summary.start()  # 하루 집계 메시지 보내는 태스크 시작
+    send_daily_summary.start()  # 하루 집계 메시지 보내는 태스크 시작
 
 @bot.event
 async def on_voice_state_update(member, before, after):
@@ -79,15 +78,10 @@ async def on_voice_state_update(member, before, after):
                 embed.set_footer(text="별지기와 함께하는 추억 저장 중...")
                 await text_channel.send(embed=embed)
 
-@tasks.loop(minutes=1)
+@tasks.loop(hours=24)
 async def send_daily_summary():
-    # 매일 자정에 집계 메시지를 보냄
-    now = datetime.now()
-    target_time = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    sleep_time = (target_time - now).total_seconds()
-    if sleep_time > 0:
-        await asyncio.sleep(sleep_time)
-
+    # 하루 집계 메시지를 보냄
+    await asyncio.sleep((datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - datetime.now()).total_seconds())
     text_channel = bot.get_channel(TEXT_CHANNEL_ID)
     if text_channel:
         embed = discord.Embed(
@@ -110,3 +104,4 @@ async def send_daily_summary():
 
 # 봇 실행
 bot.run(BOT_TOKEN)
+
