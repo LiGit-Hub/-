@@ -104,4 +104,3 @@ async def send_daily_summary():
 
 # 봇 실행
 bot.run(BOT_TOKEN)
-
